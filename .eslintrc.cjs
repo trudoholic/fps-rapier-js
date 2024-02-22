@@ -20,6 +20,8 @@ module.exports = {
     'react/no-unknown-property': ['error', { ignore: [
       'args',
       'intensity',
+      'map',
+      'map-repeat',
       'position',
       'rotation-x',
     ] }],
