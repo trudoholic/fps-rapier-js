@@ -6,6 +6,7 @@ const App = () => {
   return (
     <>
       <Sky sunPosition={[100, 20, 100]} />
+      <ambientLight intensity={1.5} />
       <Ground />
     </>
   )

@@ -17,6 +17,11 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
-    'react/no-unknown-property': ['error', { ignore: ['args','position','rotation-x'] }],
+    'react/no-unknown-property': ['error', { ignore: [
+      'args',
+      'intensity',
+      'position',
+      'rotation-x',
+    ] }],
   },
 }
