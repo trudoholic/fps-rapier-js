@@ -4,14 +4,17 @@ import {useRef} from "react"
 import {useFrame} from "@react-three/fiber"
 import {RigidBody, useRapier} from "@react-three/rapier"
 import {usePersonControls} from "./hooks.js"
+import {Weapon} from "./Weapon.jsx"
 
 const MOVE_SPEED = 5
 const direction = new THREE.Vector3()
 const frontVector = new THREE.Vector3()
 const sideVector = new THREE.Vector3()
+const rotation = new THREE.Vector3()
 
 export const Player = () => {
   const playerRef = useRef()
+  const objectInHandRef = useRef()
   const { forward, backward, left, right, jump } = usePersonControls()
   const rapier = useRapier()
 
@@ -42,6 +45,10 @@ export const Player = () => {
     const translation = playerRef.current?.translation()
     const {x, y, z} = translation
     state.camera.position.set(x, y, z)
+
+    // moving object in hand for the player
+    objectInHandRef.current?.rotation.copy(state.camera.rotation)
+    objectInHandRef.current?.position.copy(state.camera.position).add(state.camera.getWorldDirection(rotation))
   })
 
   const doJump = () => {
@@ -55,6 +62,9 @@ export const Player = () => {
           <capsuleGeometry args={[0.75, 0.5]}/>
         </mesh>
       </RigidBody>
+      <group ref={objectInHandRef}>
+        <Weapon position={[0.3, -0.1, 0.3]} scale={0.3} />
+      </group>
     </>
   )
 }
