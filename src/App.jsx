@@ -1,13 +1,17 @@
+import {useFrame} from "@react-three/fiber"
 import {PointerLockControls, Sky} from "@react-three/drei"
 import {Physics} from "@react-three/rapier"
+import * as TWEEN from "@tweenjs/tween.js"
 import {Ground} from "./Ground.jsx"
 import {Player} from "./Player.jsx"
 import {Cubes} from "./Cube.jsx"
-import {WeaponModel} from "./WeaponModel.jsx"
 
 const shadowOffset = 50
 
 const App = () => {
+  useFrame(() => {
+    TWEEN.update()
+  })
 
   return (
     <>
@@ -30,10 +34,6 @@ const App = () => {
         <Player />
         <Cubes />
       </Physics>
-
-      <group position={[3, 1, -2]}>
-        <WeaponModel />
-      </group>
     </>
   )
 }
