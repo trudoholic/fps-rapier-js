@@ -27,6 +27,11 @@ module.exports = {
       'position',
       'receiveShadow',
       'rotation-x',
+      'shadow-mapSize',
+      'shadow-camera-top',
+      'shadow-camera-bottom',
+      'shadow-camera-left',
+      'shadow-camera-right',
     ] }],
   },
 }
