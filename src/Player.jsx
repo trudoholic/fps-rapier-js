@@ -1,7 +1,8 @@
 import * as THREE from "three"
+import * as RAPIER from "@dimforge/rapier3d-compat"
 import {useRef} from "react"
 import {useFrame} from "@react-three/fiber"
-import {RigidBody} from "@react-three/rapier"
+import {RigidBody, useRapier} from "@react-three/rapier"
 import {usePersonControls} from "./hooks.js"
 
 const MOVE_SPEED = 5
@@ -11,11 +12,13 @@ const sideVector = new THREE.Vector3()
 
 export const Player = () => {
   const playerRef = useRef()
-  const { forward, backward, left, right } = usePersonControls()//, jump
+  const { forward, backward, left, right, jump } = usePersonControls()
+  const rapier = useRapier()
 
   useFrame((/*state*/) => {
     if (!playerRef.current) return
 
+    // moving player
     const velocity = playerRef.current?.linvel()
 
     frontVector.set(0, 0, backward - forward)
@@ -24,7 +27,20 @@ export const Player = () => {
 
     playerRef.current?.wakeUp()
     playerRef.current?.setLinvel({ x: direction.x, y: velocity.y, z: direction.z })
-  });
+
+    // jumping
+    const world = rapier.world
+    const ray = world.castRay(
+      new RAPIER.Ray(playerRef.current?.translation(), { x: 0, y: -1, z: 0 }), 4.0, true
+    )
+    const grounded = ray && ray.collider && Math.abs(ray.toi) <= 1
+
+    if (jump && grounded) doJump()
+  })
+
+  const doJump = () => {
+    playerRef.current?.setLinvel({x: 0, y: 8, z: 0});
+  }
 
   return (
     <>
