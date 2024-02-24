@@ -20,6 +20,7 @@ module.exports = {
     'react/no-unknown-property': ['error', { ignore: [
       'args',
       'castShadow',
+      'dispose',
       'intensity',
       'map',
       'map-repeat',
