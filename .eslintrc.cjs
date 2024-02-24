@@ -19,10 +19,12 @@ module.exports = {
     ],
     'react/no-unknown-property': ['error', { ignore: [
       'args',
+      'castShadow',
       'intensity',
       'map',
       'map-repeat',
       'position',
+      'receiveShadow',
       'rotation-x',
     ] }],
   },
