@@ -15,15 +15,16 @@ export const Player = () => {
   const { forward, backward, left, right, jump } = usePersonControls()
   const rapier = useRapier()
 
-  useFrame((/*state*/) => {
-    if (!playerRef.current) return
+  useFrame((state) => {
+    if (!playerRef?.current) return
 
     // moving player
     const velocity = playerRef.current?.linvel()
 
     frontVector.set(0, 0, backward - forward)
     sideVector.set(left - right, 0, 0)
-    direction.subVectors(frontVector, sideVector).normalize().multiplyScalar(MOVE_SPEED)
+    direction.subVectors(frontVector, sideVector).normalize()
+      .multiplyScalar(MOVE_SPEED).applyEuler(state.camera.rotation)
 
     playerRef.current?.wakeUp()
     playerRef.current?.setLinvel({ x: direction.x, y: velocity.y, z: direction.z })
@@ -33,9 +34,14 @@ export const Player = () => {
     const ray = world.castRay(
       new RAPIER.Ray(playerRef.current?.translation(), { x: 0, y: -1, z: 0 }), 4.0, true
     )
-    const grounded = ray && ray.collider && Math.abs(ray.toi) <= 1
+    const grounded = ray && ray.collider && Math.abs(ray.toi) <= 1.5
 
     if (jump && grounded) doJump()
+
+    // moving camera
+    const translation = playerRef.current?.translation()
+    const {x, y, z} = translation
+    state.camera.position.set(x, y, z)
   })
 
   const doJump = () => {
@@ -46,7 +52,7 @@ export const Player = () => {
     <>
       <RigidBody position={[0, 1, -2]} ref={playerRef}>
         <mesh>
-          <capsuleGeometry args={[0.5, 0.5]}/>
+          <capsuleGeometry args={[0.75, 0.5]}/>
         </mesh>
       </RigidBody>
     </>
