@@ -1,7 +1,7 @@
 import * as THREE from "three"
 import * as RAPIER from "@dimforge/rapier3d-compat"
 import * as TWEEN from "@tweenjs/tween.js"
-import {useEffect, useRef, useState} from "react"
+import {useCallback, useEffect, useRef, useState} from "react"
 import {useFrame} from "@react-three/fiber"
 import {RigidBody, useRapier} from "@react-three/rapier"
 import {usePersonControls} from "./hooks.js"
@@ -21,6 +21,9 @@ export const Player = () => {
   const [swayingAnimation, setSwayingAnimation] = useState(null)
   const [, setSwayingBackAnimation] = useState(null)
   const [isSwayingAnimationFinished, setIsSwayingAnimationFinished] = useState(true)
+  const [swayingNewPosition, setSwayingNewPosition] = useState(new THREE.Vector3(-0.005, 0.005, 0))
+  const [swayingDuration, setSwayingDuration] = useState(1000)
+  const [isMoving, setIsMoving] = useState(false)
 
   const { forward, backward, left, right, jump } = usePersonControls()
   const rapier = useRapier()
@@ -57,9 +60,9 @@ export const Player = () => {
     objectInHandRef.current?.rotation.copy(state.camera.rotation)
     objectInHandRef.current?.position.copy(state.camera.position).add(state.camera.getWorldDirection(rotation))
 
-    const isMoving = direction.length() > 0
+    setIsMoving(direction.length() > 0)
 
-    if (isMoving && isSwayingAnimationFinished) {
+    if (swayingAnimation && isSwayingAnimationFinished) {
       setIsSwayingAnimationFinished(false)
       swayingAnimation.start()
     }
@@ -71,11 +74,30 @@ export const Player = () => {
     playerRef.current?.setLinvel({x: 0, y: 8, z: 0})
   }
 
-  const initSwayingObjectAnimation = () => {
+  const setAnimationParams = useCallback(() => {
+    if (!swayingAnimation) return
+
+    swayingAnimation.stop()
+    setIsSwayingAnimationFinished(true)
+
+    if (isMoving) {
+      setSwayingDuration(() => 300)
+      setSwayingNewPosition(() => new THREE.Vector3(-0.05, 0, 0))
+    } else {
+      setSwayingDuration(() => 1000)
+      setSwayingNewPosition(() => new THREE.Vector3(-0.01, 0, 0))
+    }
+  }, [isMoving, swayingAnimation])
+
+  useEffect(() => {
+    setAnimationParams()
+  }, [isMoving, setAnimationParams])
+
+  const initSwayingObjectAnimation = useCallback(() => {
     const currentPosition = new THREE.Vector3(0, 0, 0)
     const initialPosition = new THREE.Vector3(0, 0, 0)
-    const newPosition = new THREE.Vector3(-0.05, 0, 0)
-    const animationDuration = 300
+    const newPosition = swayingNewPosition
+    const animationDuration = swayingDuration
     const easing = TWEEN.Easing.Quadratic.Out
 
     const twSwayingAnimation = new TWEEN.Tween(currentPosition)
@@ -99,11 +121,11 @@ export const Player = () => {
 
     setSwayingAnimation(twSwayingAnimation)
     setSwayingBackAnimation(twSwayingBackAnimation)
-  }
+  }, [swayingDuration, swayingNewPosition])
 
   useEffect(() => {
     initSwayingObjectAnimation()
-  }, [])
+  }, [initSwayingObjectAnimation, swayingDuration, swayingNewPosition])
 
   return (
     <>
